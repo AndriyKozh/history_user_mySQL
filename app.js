@@ -1,11 +1,10 @@
 const mysql2 = require("mysql2");
-const arrHystory = require("./arr");
+
 require("dotenv").config();
+
 const { v4: uuidv4 } = require("uuid");
-
+const arrHystory = require("./arr");
 const { HOST, USER, DATABASE, PASSWORD } = process.env;
-
-// конфігурація текмта
 
 const conection = mysql2.createConnection({
   host: HOST,
@@ -13,6 +12,8 @@ const conection = mysql2.createConnection({
   database: DATABASE,
   password: PASSWORD,
 });
+
+//===================== table connection ============  watch_history - table =========
 
 conection.connect(function (err) {
   if (err) {
@@ -22,49 +23,50 @@ conection.connect(function (err) {
   }
 });
 
-conection.execute("SELECT * FROM `test_two`", function (err, results) {
+conection.execute("SELECT * FROM `watch_history`", function (err, results) {
   console.log(err);
   console.table(results);
 });
 
 // ================ ADD LINE INFO_HISTORY ==================
 
-// const history = [];
+const history = [];
 
-// function resultArr(arrHistory) {
-//   for (let i = 0; i < arrHistory.length; i++) {
-//     const arrIndx = arrHistory[i];
+function resultArr(arrHistory) {
+  for (let i = 0; i < arrHistory.length; i++) {
+    const arrIndx = arrHistory[i];
 
-//     // console.log(title);
-//     const titleUrl = arrIndx.titleUrl;
-//     const time = arrIndx.time;
+    const titleUrl = arrIndx.titleUrl;
 
-//     const nullItem = uuidv4();
+    let time = arrIndx.time.split("");
+    const timeOne = time.splice(10, 1, " ");
+    const timeTwo = time.join("");
+    const dateWathVideo = timeTwo.slice(0, 18);
 
-//     if (titleUrl) {
-//       const id = titleUrl?.slice(32, 47);
-//       history.push([id, titleUrl, time]);
-//     } else {
-//       history.push([nullItem, null, null]);
-//     }
-//   }
+    const titles = arrIndx.title;
+    const titleVideo = titles.slice(18);
 
-//   for (let i = 0; i < history.length; i++) {
-//     const a = history[i];
-//     console.log(a);
+    if (titleUrl) {
+      const id = titleUrl?.slice(32, 47);
+      history.push([id, titleVideo, titleUrl, dateWathVideo, i]);
+    } else {
+      continue;
+    }
+  }
+  for (let i = 0; i < history.length; i++) {
+    const a = history[i];
+    console.log(a);
 
-//     const sql = "INSERT INTO test_two VALUE (?,?,?)";
+    const sql = "INSERT INTO watch_history VALUE (?,?,?,?,?)"; // watch_history - table
 
-//     conection.execute(sql, a, function (err) {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         console.log("УСПІШНО ДОБАВЛЕНО");
-//       }
-//     });
-//   }
-// }
+    conection.execute(sql, a, function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("УСПІШНО ДОБАВЛЕНО");
+      }
+    });
+  }
+}
 
-// const resultAdd = resultArr(arrHystory);
-
-// console.log(resultAdd);
+resultArr(arrHystory);
